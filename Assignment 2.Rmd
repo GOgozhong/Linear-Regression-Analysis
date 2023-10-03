@@ -1,0 +1,381 @@
+---
+title: "Assignment 2"
+author: "QIHAO ZHONG"
+date: "11/10/2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+1. In oreder to create a new subset by removing two cases of the most extreme sale prices, I draw a boxplot to check which two is the most extreme value.
+
+
+```{r,echo=FALSE}
+setwd("/Users/karon/Downloads")
+data=read.csv("reale.csv",header=TRUE)
+attach(data)
+str(data)
+
+boxplot(sale.price.in..100000,main="boxplot8290")
+subset=subset(data,sale.price.in..100000<max(sale.price.in..100000)&sale.price.in..100000>min(sale.price.in..100000))
+ID=subset$Case_ID
+listprices=subset$list.price.in..100000
+salesprices=subset$sale.price.in..100000
+location=subset$location
+taxes=subset$taxes
+names(subset)[1:3]=c("ID","salesprices","listprices")
+
+```
+
+After checking the boxplot, I decide to removing the maximum and minimum of sale prices to create a new subset. Because these two value are much larger or lower than other values.
+
+```{r,echo=FALSE}
+subsetX=subset[location=="O",]
+subsetO=subset[location=="X",]
+
+lmod=lm(salesprices~listprices, data=subset)
+plot(listprices, salesprices, xlab="list_prices", ylab="sale_prices",main="Scatterplot of listprices&salesprices8290", pch=NA_integer_)
+
+points(subsetO$listprices,subsetO$salesprices,col="blue",pch=16,cex=.8)
+points(subsetX$listprices,subsetX$salesprices,col="red",cex=.8,pch=5)
+
+lmodX=lm(subsetX$salesprices ~ subsetX$listprices)
+lmod0=lm(subsetO$salesprices ~ subsetO$listprices)
+
+lines(subsetO$listprices, fitted(lmod0), col="blue",lwd=2)
+lines(subsetX$listprices, fitted(lmodX), col="red",lwd=2)
+
+abline(lmod, col="green", lty="dashed")
+legend(x=10,y=30,c("Neighbourhood X","Neighbourhood O"),cex=.8,col=c("red","blue"),pch=c(5,16))
+
+
+
+##FOR THE TAXES AND SALESPRICE
+
+
+
+TsubsetX=subset[location=="O",]
+TsubsetO=subset[location=="X",]
+
+Tlmod=lm(salesprices~taxes, data=subset)
+plot(taxes, salesprices, xlab="taxes", ylab="sale_prices",main="Scatterplot of taxes&salesprices8290", pch=NA_integer_)
+
+points(TsubsetO$taxes,TsubsetO$salesprices,col="green",pch=16,cex=.8)
+points(TsubsetX$taxes,TsubsetX$salesprices,col="red",cex=.8,pch=5)
+
+TlmodX=lm(TsubsetX$salesprices ~ TsubsetX$taxes)
+Tlmod0=lm(TsubsetO$salesprices ~ TsubsetO$taxes)
+
+
+
+abline(Tlmod, col="yellow", lty="dashed")
+abline(TlmodX,col="red")
+abline(Tlmod0,col="green")
+legend(x=5000,y=30,c("Neighbourhood X","Neighbourhood O"),cex=.8,col=c("red","green"),pch=c(5,16))
+```
+
+
+In the scatterplot of listprice and saleprice. For neighborhood X, we can see most of red points are close to the red line(fitted line for neighborhood X), therefore, we can say this linear regression for neigborhood X seems appropriate; For neighborhood O, we can see most of blue points are close to the blue line(fitted line for neighborhood O), therefore, we can say this linear regression for neigborhood O seems appropriate. For all neighborhood, we can see most of points are close to the green line(fitted line for all), we can say this linear regression for all neighborhood seems appropriate. 
+
+In the scatterplot of taxes and saleprice. we can see most of red points are close to red line(fitted line for neighborhood X) and yellow line(fitted line for all), and the green line(fitted line for neighborhood Y) are not close to the yellow line(fitted line for all), so we can say neighborhood X are more likely a linear regression than the neighborhood Y. 
+
+
+
+----------------
+
+
+2.
+(a)
+```{r,echo=FALSE}
+qqnorm(subset$salesprices, pch = 1, frame = FALSE, main="Normal qq-plot for sale price8290")
+qqline(subset$salesprices, col = "steelblue", lwd = 2)
+```
+(b)
+```{r,echo=FALSE}
+logsaleprices=log10(subset$salesprices)
+qqnorm(logsaleprices, pch = 1, frame = FALSE, main="Normal qq-plot for log sale price8290")
+qqline(logsaleprices, col = "steelblue", lwd = 2)
+```
+(c)
+```{r,echo=FALSE}
+sqsaleprices=sqrt(subset$salesprices)
+qqnorm(sqsaleprices, pch = 1, frame = FALSE, main="Normal qq-plot for square root of sale price8290")
+qqline(sqsaleprices, col = "steelblue", lwd = 2)
+```
+(d)
+```{r,echo=FALSE}
+invsaleprices=(subset$salesprices)^(-1)
+qqnorm(invsaleprices, pch = 1, frame = FALSE, main="Normal qq-plot for the inverse of sale price8290")
+qqline(invsaleprices, col = "steelblue", lwd = 2)
+```
+
+From the above four plots, the inverse of sale price is approximately normal. In the plot(a) plot (b) plot(c), the points form a curve instead of a straight line. so the sample data are skewed. plot (d) is more close to a striaght line. so the plot (d) is approximately normal. 
+
+
+--------
+
+
+
+3. 
+(a)Simple linear regressions (SLR) for sale price from list price, for all data
+```{r,echo=FALSE}
+summary(lmod)
+confint(lmod, level=0.95)
+```
+(b)Simple linear regressions (SLR) for sale price from list price, for neighborhood X
+```{r,echo=FALSE}
+summary(lmodX)
+confint(lmodX, level=0.95)
+```
+(c)Simple linear regressions (SLR) for sale price from list price, for neighborhood O
+```{r,echo=FALSE}
+summary(lmod0)
+confint(lmod0, level=0.95)
+```
+
+__
+
+___Here is the table___:
+
+
+
+```{r,echo=FALSE}
+a= matrix(c(0.991,0.597466,0.919459,0.4575,"<2.2e-16","[0.9057369,0.9331813]",0.9915,0.499979,0.926232,0.483, "<2.2e-16","[0.9092760,0.9431889]",0.9901,0.84505,0.90083,0.4042,"<2.2e-16","[0.8767317,0.9249268]"), nrow=3, ncol=6, byrow=TRUE)
+
+dimnames(a) = list(c("All data", "nbhd_X","nbhd_O"), c("R2", "B0","B1","var(e)","p-value","95%CI")) # column names 
+
+print(a)
+```
+
+
+
+----------
+
+
+
+4.
+From question 3, we know: 
+For all data: R-squared = 0.991
+For neignborhood X: R-squared=0.9915
+For neignborhood O: R-squared=0.9901
+They are very similar. From the scartter plot, we can see the data between two location are very close to each other. So they have similar data on list price and sale price. Then, they have the similar simple linear regression. They all have the variability of the response data around their mean. 
+
+---------
+
+
+
+5.
+```{r,echo=FALSE}
+lmodX=lm(subsetX$salesprices ~ subsetX$listprices)
+coefficients(lmodX)
+lmod0=lm(subsetO$salesprices ~ subsetO$listprices)
+coefficients(lmod0)
+seX=0.483
+seO=0.4042
+slopeX=0.9262325
+slopeO=0.9008293
+sdX=sd(subsetX$listprices)
+sdO=sd(subsetO$listprices)
+sdXsq=sdX^2
+sdOsq=sdO^2
+sdO=sd(subsetO$listprices)
+n.1 <- length(subsetX$salesprices)
+n.2 <- length(subsetO$salesprices)
+numerator = slopeX-slopeO
+Sressq=((n.1-2)*(seX^2)+(n.2-2)*(seO^2))/(n.1+n.2-4)
+Sb1b2=(sqrt(Sressq))*sqrt((1/(sdXsq*(n.1-1))+(1/(sdOsq*(n.2-1)))))
+t=numerator/Sb1b2
+df=n.1+n.2-4
+print('t-value')
+print(t)
+print('df')
+print(df)
+print('p-value')
+p.value = 2*pt(t, df, lower=FALSE)
+print(p.value)
+ 
+``` 
+Aim:Compare two slopes, H0:b1x=b1o;    H1:b1x not= b1o
+After calculating the t-test, we have the p-value bigger than the 0.05, which means we fail to reject the H0. Which means we fail to reject that they have the same slope. So, we cannot conclude that there is any significant difference between the slopes of the 2 regressions.
+The t procedure can be used to compare the two slopes is because there are only two lines. If there are more than two lines, then t-test cannot be used. 
+
+
+--------
+
+
+6.
+```{r,echo=FALSE}
+
+plot(subset$listprices, subset$salesprices, xlab="list_prices", ylab="sale_prices",main="Scatterplot of listprices&salesprices8290",pch=16,col="grey")
+abline(lm(subset$salesprices~subset$listprices), col="brown")
+
+``` 
+
+There are four SLR assumptions, (1) Linearity and additivity: we can check from the graph, the expected value of dependent variable is a likely straight-line function of each independent variable, holding the others fixed; the slope of the line only depends on the list prices; The effects of list prices on the expected value of sale prices are additive.(2) statistical independence of the errors: the points appears randomly.(3) homoscedasticity: the shape of points looks like a tube instead of a cone, which means the errors are not getting larger or smaller. (4) normality of the error distribution: the values are fairly close to the line, and there is no outlier. So, conclude that the model for all data have no violations of the normal error SLR assumptions.
+
+
+------------
+
+7.
+Number of bathrooms and construction year could be used to fit a multiple linear regression for sale price. Because consumer will consider these two variable when they buy a new property.
+
+
+---------
+
+
+__Appendix__
+
+___1___
+```{r,eval=FALSE}
+setwd("/Users/karon/Downloads")
+data=read.csv("reale.csv",header=TRUE)
+attach(data)
+str(data)
+
+boxplot(sale.price.in..100000,main="boxplot8290")
+subset=subset(data,sale.price.in..100000<max(sale.price.in..100000)&sale.price.in..100000>min(sale.price.in..100000))
+ID=subset$Case_ID
+listprices=subset$list.price.in..100000
+salesprices=subset$sale.price.in..100000
+location=subset$location
+taxes=subset$taxes
+names(subset)[1:3]=c("ID","salesprices","listprices")
+```
+
+```{r,eval=FALSE}
+subsetX=subset[location=="O",]
+subsetO=subset[location=="X",]
+
+lmod=lm(salesprices~listprices, data=subset)
+plot(listprices, salesprices, xlab="list_prices", ylab="sale_prices",main="Scatterplot of listprices&salesprices8290", pch=NA_integer_)
+
+points(subsetO$listprices,subsetO$salesprices,col="blue",pch=16,cex=.8)
+points(subsetX$listprices,subsetX$salesprices,col="red",cex=.8,pch=5)
+
+lmodX=lm(subsetX$salesprices ~ subsetX$listprices)
+lmod0=lm(subsetO$salesprices ~ subsetO$listprices)
+
+lines(subsetO$listprices, fitted(lmod0), col="blue",lwd=2)
+lines(subsetX$listprices, fitted(lmodX), col="red",lwd=2)
+
+abline(lmod, col="green", lty="dashed")
+legend(x=10,y=30,c("Neighbourhood X","Neighbourhood O"),cex=.8,col=c("red","blue"),pch=c(5,16))
+
+
+
+##FOR THE TAXES AND SALESPRICE
+
+
+
+TsubsetX=subset[location=="O",]
+TsubsetO=subset[location=="X",]
+
+Tlmod=lm(salesprices~taxes, data=subset)
+plot(taxes, salesprices, xlab="taxes", ylab="sale_prices",main="Scatterplot of taxes&salesprices8290", pch=NA_integer_)
+
+points(TsubsetO$taxes,TsubsetO$salesprices,col="green",pch=16,cex=.8)
+points(TsubsetX$taxes,TsubsetX$salesprices,col="red",cex=.8,pch=5)
+
+TlmodX=lm(TsubsetX$salesprices ~ TsubsetX$taxes)
+Tlmod0=lm(TsubsetO$salesprices ~ TsubsetO$taxes)
+
+
+
+abline(Tlmod, col="yellow", lty="dashed")
+abline(TlmodX,col="red")
+abline(Tlmod0,col="green")
+legend(x=5000,y=30,c("Neighbourhood X","Neighbourhood O"),cex=.8,col=c("red","green"),pch=c(5,16))
+```
+
+
+
+___2___
+
+
+```{r,eval=FALSE}
+qqnorm(subset$salesprices, pch = 1, frame = FALSE, main="Normal qq-plot for sale price")
+qqline(subset$salesprices, col = "steelblue", lwd = 2)
+```
+
+
+```{r,eval=FALSE}
+logsaleprices=log10(subset$salesprices)
+qqnorm(logsaleprices, pch = 1, frame = FALSE, main="Normal qq-plot for log sale price")
+qqline(logsaleprices, col = "steelblue", lwd = 2)
+```
+
+```{r,eval=FALSE}
+sqsaleprices=sqrt(subset$salesprices)
+qqnorm(sqsaleprices, pch = 1, frame = FALSE, main="Normal qq-plot for square root of sale price")
+qqline(sqsaleprices, col = "steelblue", lwd = 2)
+```
+
+```{r,eval=FALSE}
+invsaleprices=(subset$salesprices)^(-1)
+qqnorm(invsaleprices, pch = 1, frame = FALSE, main="Normal qq-plot for the inverse of sale price")
+qqline(invsaleprices, col = "steelblue", lwd = 2)
+```
+
+
+
+___3___
+
+```{r,eval=FALSE}
+summary(lmod)
+confint(lmod, level=0.95)
+```
+
+```{r,eval=FALSE}
+summary(lmodX)
+confint(lmodX, level=0.95)
+```
+
+```{r,eval=FALSE}
+summary(lmod0)
+confint(lmod0, level=0.95)
+```
+
+```{r,eval=FALSE}
+a= matrix(c(0.991,0.597466,0.919459,0.4575,"<2.2e-16","[0.9057369,0.9331813]",0.9915,0.499979,0.926232,0.483, "<2.2e-16","[0.9092760,0.9431889]",0.9901,0.84505,0.90083,0.4042,"<2.2e-16","[0.8767317,0.9249268]"), nrow=3, ncol=6, byrow=TRUE)
+
+dimnames(a) = list(c("All data", "neighbourhood_X","neighbourhood_O"), c("R2", "B0","B1","var(e)","p-value","95%CI")) # column names 
+
+print(a)
+```
+
+
+___5___
+```{r,eval=FALSE}
+lmodX=lm(subsetX$salesprices ~ subsetX$listprices)
+coefficients(lmodX)
+lmod0=lm(subsetO$salesprices ~ subsetO$listprices)
+coefficients(lmod0)
+seX=0.483
+seO=0.4042
+slopeX=0.9262325
+slopeO=0.9008293
+sdX=sd(subsetX$listprices)
+sdO=sd(subsetO$listprices)
+sdXsq=sdX^2
+sdOsq=sdO^2
+sdO=sd(subsetO$listprices)
+n.1 <- length(subsetX$salesprices)
+n.2 <- length(subsetO$salesprices)
+numerator = slopeX-slopeO
+Sressq=((n.1-2)*(seX^2)+(n.2-2)*(seO^2))/(n.1+n.2-4)
+Sb1b2=(sqrt(Sressq))*sqrt((1/(sdXsq*(n.1-1))+(1/(sdOsq*(n.2-1)))))
+t=numerator/Sb1b2
+df=n.1+n.2-4
+print(t)
+print(df)
+p.value = 2*pt(t, df, lower=FALSE)
+print(p.value)
+``` 
+
+___6___
+```{r,eval=FALSE}
+plot(subset$listprices, subset$salesprices, xlab="list_prices", ylab="sale_prices",main="Scatterplot of listprices&salesprices8290",pch=16,col="grey")
+abline(lm(subset$salesprices~subset$listprices), col="brown")
+
+``` 
+ 
+ 
